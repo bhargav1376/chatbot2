@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS Chatbot</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <div id="chatbot-toggle">
+        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Chatbot" />
+    </div>
+
+    <div id="chatbot-container">
+        <div class="chat-header">
+            <span class="chat-dis">
+                <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" class="chatbot-img" />
+                <span class="chat-io">Chatbot</span>
+            </span>
+            <div class="dropdown-container">
+                <button class="header-btn" onclick="toggleDropdown()">
+                    <i id="dropdown-icon" class="fa fa-ellipsis-h"></i>
+                </button>
+
+                <div id="dropdown-menu" class="dropdown-menu">
+                    <button onclick="clearChat()"><i class="fa fa-trash"></i> Clear Chat</button>
+                    <div class="sound-toggle"  >
+                        <span><i class="fa fa-volume-up" id="sound-icon"></i> Sound</span>
+                        <label class="switch">
+                            <input type="checkbox" id="soundToggle" checked onchange="toggleSound(this)">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <button class="close-btn" onclick="toggleChatbot()">✖</button>
+        </div>
+
+        <div id="chat-body" class="chat-body"></div>
+
+        <div class="chat-footer">
+            <textarea id="chat-input" placeholder="Type a message..."></textarea>
+             <button class="mic-btn" onclick="openMicModal()"><i class="fa fa-microphone"></i></button>
+            <button id="send-btn" onclick="sendMessage()"><i class="fa fa-send-o"></i></button>
+        </div>
+    </div>
+
+    <div class="error-toast" id="error-toast"></div>
+
+    <!-- Mic Modal -->
+    <div id="mic-modal" class="mic-modal">
+        <div class="mic-modal-content">
+            <button id="mic-close" class="cancel-mic">x</button>
+            <div class="mic-anim">
+                
+                <i class="fa fa-microphone mic-icon"></i>
+                <div class="mic-wave"></div>
+            </div>
+            <p id="mic-status"></p>
+            <button id="mic-retry" class="button-micv" onclick="openMicModal()"><span class="retry"> <i class="fa fa-refresh"></i> Retry</span></button>&nbsp;
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.getElementById("mic-close").addEventListener("click", closeMicModal);
+        document.getElementById("chatbot-toggle").addEventListener("click", toggleChatbot);
+
+        // --- Mic Retry Button State ---
+        function updateMicRetryButton() {
+            const status = document.getElementById("mic-status").innerText;
+            const retryBtn = document.getElementById("mic-retry");
+            if (!retryBtn) return;
+            if (status === "Listening...") {
+                retryBtn.disabled = true;
+                retryBtn.style.display = "none";
+                retryBtn.classList.add("disabled-btn");
+            } else {
+                retryBtn.disabled = false;
+                retryBtn.style.display = "inline-block";
+                retryBtn.classList.remove("disabled-btn");
+            }
+        }
+
+        // Observe mic-status changes
+        const micStatus = document.getElementById("mic-status");
+        const observer = new MutationObserver(updateMicRetryButton);
+        observer.observe(micStatus, { childList: true });
+        // Initial state
+        updateMicRetryButton();
+    </script>
+    <script >
+      document.getElementById("dropdown-btn").addEventListener("click", () => {
+    const menu = document.getElementById("dropdown-menu");
+    const icon = document.getElementById("dropdown-icon");
+    const isOpen = menu.classList.contains("show-menu");
+
+    if (!isOpen) {
+        menu.classList.add("show-menu");
+        icon.classList.remove("fa-ellipsis-h");
+        icon.classList.add("fa-times", "rotate-icon");
+    } else {
+        menu.classList.remove("show-menu");
+        icon.classList.remove("fa-times", "rotate-icon");
+        icon.classList.add("fa-ellipsis-h");
+    }
+});
+
+function clearChat() {
+    document.getElementById("chat-body").innerHTML = "";
+    showWelcomeMessage();
+
+    const menu = document.getElementById("dropdown-menu");
+    const icon = document.getElementById("dropdown-icon");
+    menu.classList.remove("show-menu");
+    icon.classList.remove("fa-times", "rotate-icon");
+    icon.classList.add("fa-ellipsis-h");
+}
+
+
+// --- Sound Toggle ---
+let soundEnabled = true;
+
+function updateSoundUI() {
+    const soundIcon = document.getElementById("sound-icon");
+    const soundToggle = document.getElementById("soundToggle");
+
+    soundToggle.checked = soundEnabled;
+
+    if (soundEnabled) {
+        soundIcon.classList.remove("fa-volume-off");
+        soundIcon.classList.add("fa-volume-up");
+    } else {
+        soundIcon.classList.remove("fa-volume-up");
+        soundIcon.classList.add("fa-volume-off");
+    }
+}
+
+// --- Click anywhere in sound-toggle (except the checkbox itself)
+document.querySelector(".sound-toggle").addEventListener("click", (e) => {
+    // Prevent double toggle when clicking directly on the checkbox
+    if (e.target.id !== "soundToggle") {
+        soundEnabled = !soundEnabled;
+        updateSoundUI();
+    }
+});
+
+// --- Listen for manual checkbox toggle
+document.getElementById("soundToggle").addEventListener("change", (e) => {
+    soundEnabled = e.target.checked;
+    updateSoundUI();
+});
+
+
+    </script>
+
+</body>
+</html>
